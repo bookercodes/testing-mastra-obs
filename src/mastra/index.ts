@@ -10,6 +10,22 @@ import {
 import { agent } from "./agents/agent";
 import { startScheduleTool, stopScheduleTool } from "./tools/schedule-tools";
 
+const tursoDatabaseUrl = process.env.TURSO_DATABASE_URL;
+const tursoAuthToken = process.env.TURSO_AUTH_TOKEN;
+
+const storage = new LibSQLStore(
+  tursoDatabaseUrl && tursoAuthToken
+    ? {
+        id: "mastra-storage",
+        url: tursoDatabaseUrl,
+        authToken: tursoAuthToken,
+      }
+    : {
+        id: "mastra-storage",
+        url: "file:./mastra.db",
+      },
+);
+
 export const mastra = new Mastra({
   bundler: {
     externals: ["@duckdb/node-bindings"],
@@ -18,11 +34,7 @@ export const mastra = new Mastra({
   tools: { startScheduleTool, stopScheduleTool },
   storage: new MastraCompositeStore({
     id: "composite-storage",
-    default: new LibSQLStore({
-      id: "mastra-storage",
-      url: process.env.TURSO_DATABASE_URL || "file:./mastra.db",
-      authToken: process.env.TURSO_AUTH_TOKEN || undefined,
-    }),
+    default: storage,
     domains: {
       observability: await new DuckDBStore().getStore("observability"),
     },
