@@ -22,7 +22,7 @@ const storage = new LibSQLStore(
       }
     : {
         id: "mastra-storage",
-        url: "file:./mastra.db",
+        url: ":memory:",
       },
 );
 
